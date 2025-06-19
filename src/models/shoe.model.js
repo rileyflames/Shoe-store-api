@@ -32,5 +32,36 @@ const shoeSchema = new Schema({
             validator: (arr) => arr.length > 0,
             message: 'At least one size must be provided'
         }
-    }
-})
+    },
+    color:{
+        type: String,
+        enum: ['Black', 'White', 'Custom'],
+        required: true
+    },
+    category:{
+        type: String,
+        enum: ['Running', 'Casual', 'Formal', 'Sneakers', 'Boots'],
+        required: true
+    },
+    description:{
+        type: String,
+        trim: true,
+        default: ''
+    },
+    imageUrl:{
+        type: String,
+        required: true,
+        trim: true
+    },
+    modelSlug:{
+        type: String,
+        required: true,
+        lowercase: true,
+        trim: true
+    },
+},{
+    timestamps : true
+});
+
+
+export const Shoe = model('Shoe', shoeSchema);
