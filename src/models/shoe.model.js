@@ -59,7 +59,12 @@ const shoeSchema = new Schema({
         lowercase: true,
         trim: true
     },
-},{
+    deleted :{
+        type: Boolean,
+        default: false
+    }
+},
+{
     timestamps : true
 });
 

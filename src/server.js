@@ -1,5 +1,6 @@
 import express from 'express';
 import dotenv from 'dotenv';
+import shoeRoutes from './routes/shoe.route.js'
 
 
 import { connectToDB } from './config/db.js';
@@ -15,6 +16,10 @@ app.use(express.json());
 // Connect to MongoDB
 await connectToDB();
 
+
+
+// mount the shoe routes here under /api
+app.use('/api',shoeRoutes )
 
 // Basic route
 app.get('/', (req, res)=>{
