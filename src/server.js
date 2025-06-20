@@ -1,6 +1,7 @@
 import express from 'express';
 import dotenv from 'dotenv';
-import shoeRoutes from './routes/shoe.route.js'
+import shoeRoutes from './routes/shoe.route.js';
+import authRoutes from './routes/auth.routes.js'
 
 
 import { connectToDB } from './config/db.js';
@@ -20,6 +21,9 @@ await connectToDB();
 
 // mount the shoe routes here under /api
 app.use('/api',shoeRoutes )
+
+// mount the authRoutes here
+app.use('/api/auth',authRoutes )
 
 // Basic route
 app.get('/', (req, res)=>{
