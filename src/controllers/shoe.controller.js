@@ -6,8 +6,8 @@ import { Shoe } from '../models/shoe.model.js';
 export const getAllShoes = async (req, res) => {
 
     try {
-        // fetch all shoes
-        const shoes = await Shoe.find();
+        // fetch all shoes that aren't deleted
+        const shoes = await Shoe.find({deleted : false});
 
         // send back as json with 200 status code
         res.status(200).json(shoes)
@@ -86,23 +86,102 @@ export const updateShoe = async (req, res) => {
     }
 
 }
+// used to soft delete items 
+export const softDeleteShoe = async (req, res) => {
+  const { id } = req.params;
 
-export const deleteShoe = async ( req, res) => {
+  try {
+    const shoe = await Shoe.findByIdAndUpdate(
+      id,
+      { deleted: true },
+      { new: true, runValidators: true }
+    );
+
+    if (!shoe) {
+      return res.status(404).json({ message: 'Shoe not found' });
+    }
+
+    res.status(200).json({
+      message: 'Shoe moved to recycle bin',
+      shoe
+    });
+  } catch (error) {
+    res.status(400).json({
+      message: 'Failed to soft-delete shoe',
+      error: error.message
+    });
+  }
+};
+
+export const getDeletedShoes = async ( req, res ) => {
+    try {
+        const deletedShoes = await Shoe.find({ deleted : true});
+
+        // successful 
+        res.status(200).json(deletedShoes);
+    } catch (error) {
+        res.status(500).json({
+        message: 'Failed to fetch deleted shoes',
+        error: error.message
+    });
+    }
+}
+
+export const restoreShoe = async ( req, res ) => {
     const { id } = req.params;
 
-    try{
-        const deletedShoe = await Shoe.findByIdAndDelete(id);
+    // check the database for shoes with the attribute "deleted" then switch it from false to tue
+    try {
+        const restoredShoe = await Shoe.findByIdAndUpdate(id, {
+            deleted : false
+        },{
+            new: true, runValidators : true
+        });
 
-        if(!deletedShoe){
+        // if the shoe isn't found then return 404 code
+        if(!restoredShoe){
+            return res.status(404).json({
+                message: 'Shoe not found'
+            });
+        };
+        // if successful 
+        res.status(200).json({
+            message: 'Shoe restored successfully',
+            shoe: restoredShoe
+        });
+
+    } catch (error) {
+        // if something goes wrong
+        res.status(400).json({
+            message : 'Failed to restore shoe',
+            error: error.message
+        })
+    }
+}
+
+export const permanentlyDeleteShoe = async ( req, res ) => {
+    // parse the req,params for the id
+
+    const { id } = req.params;
+
+    try {
+        const deleted = await Shoe.findByIdAndDelete(id);
+
+        if(!deleted){
             return res.status(404).json({
                 message: 'Shoe not found'
             });
         }
-        // if successful in finding the id, then delete
+        // success?
         res.status(200).json({
-            message: 'Shoe deleted successfully '
+            message: 'Shoe permanently deleted'
         })
-    }catch(error){
-        res.status(400).json({ message: 'Failed to delete shoe', error: error.message });
+        
+    } catch (error) {
+        res.status(400).json({
+            message: 'Failed to permanently delete shoe',
+            error: error.message
+        });
+        
     }
-}
+};
