@@ -21,7 +21,7 @@ const shoeSchema = new Schema({
     },
     stock:{
         type: Number,
-        reuired: true,
+        required: true,
         default: 0,
         min: 0
     },
