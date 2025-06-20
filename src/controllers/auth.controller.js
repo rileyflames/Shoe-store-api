@@ -1,4 +1,6 @@
+import jwt from 'jsonwebtoken'
 import User from "../models/user.model.js";
+
 
 export const registerUser = async ( req, res ) =>{
     const { name, email, password } = req.body;
@@ -36,3 +38,51 @@ export const registerUser = async ( req, res ) =>{
         })
     }
 }
+
+export const loginUser = async ( req, res ) =>{
+    const { email, password } = req.body;
+
+    try {
+        // check if user exists
+        const user = await User.findOne({ email });
+        if(!user){
+            return res.status(401).json({
+                message: 'Invalid credentials'
+            })
+        }
+
+        // compare password
+        const isMatch = await user.comparePassword(password);
+        if(!isMatch){
+            return res.status(401).json({
+                message: 'Invalid credentials'
+            })
+        };
+
+        // generate JWT
+        const token = jwt.sign(
+            {
+                userId : user._id,
+                role: user.role
+            },process.env.JWT_EXPIRES_IN || '1d'
+        );
+
+        // respond with token and user info
+        res.status(200).json({
+            message: 'Login successful',
+            token,
+            user: {
+                id: user._id,
+                name: user.name,
+                email: user.email,
+                role: user.role
+            }
+        });
+
+    } catch (error) {
+         res.status(500).json({
+      message: 'Login failed',
+      error: error.message
+    });
+  }
+    };
